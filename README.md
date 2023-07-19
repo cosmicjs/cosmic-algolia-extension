@@ -1,22 +1,18 @@
-# next-template
+# Cosmic Algolia Extension
 
-A Next.js 13 template for building apps with Radix UI and Tailwind CSS.
+![Algolia](https://imgix.cosmicjs.com/cec9cdd0-265d-11ee-a19d-717742939f83-Algolia-logo-blue.png?w=1200&auto=compression,format)
 
-## Usage
+Add your Cosmic Objects to [Algolia](https://www.algolia.com).
 
-```bash
-npx create-next-app -e https://github.com/shadcn/next-template
+## Install and run
+
+```
+git clone https://github.com/cosmicjs/cosmic-algolia-extension
+cd cosmic-algolia-extension
+yarn
+yarn dev
 ```
 
-## Features
+## Contribute
 
-- Next.js 13 App Directory
-- Radix UI Primitives
-- Tailwind CSS
-- Icons from [Lucide](https://lucide.dev)
-- Dark mode with `next-themes`
-- Tailwind CSS class sorting, merging and linting.
-
-## License
-
-Licensed under the [MIT license](https://github.com/shadcn/ui/blob/main/LICENSE.md).
+Pull requests welcome!
