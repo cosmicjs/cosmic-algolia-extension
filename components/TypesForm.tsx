@@ -156,7 +156,11 @@ const TypesSelect = (
       <SelectContent>
         <SelectGroup>
           {props?.types?.map((type: { title: string; slug: string }) => (
-            <SelectItem value={type.slug} key={type.slug}>
+            <SelectItem
+              value={type.slug}
+              key={type.slug}
+              className="cursor-pointer"
+            >
               {type.title}
             </SelectItem>
           ))}
