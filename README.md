@@ -1,6 +1,6 @@
 # Cosmic Algolia Extension
 
-![Algolia](https://imgix.cosmicjs.com/cec9cdd0-265d-11ee-a19d-717742939f83-Algolia-logo-blue.png?w=1200&auto=compression,format)
+<img src="https://imgix.cosmicjs.com/cec9cdd0-265d-11ee-a19d-717742939f83-Algolia-logo-blue.png?w=1200&auto=compression,format" alt="Algolia Extension" width="600"/>
 
 Add your Cosmic Objects to [Algolia](https://www.algolia.com).
 
