@@ -23,6 +23,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/components/ui/use-toast"
 
@@ -36,18 +46,21 @@ const makeObjectIds = (objects: []) => {
 
 // Home many Objects to get
 const count = 10
+const defaultProps =
+  "id,content,created_at,metadata,modified_at,published_at,slug,title,type,locale"
 
 const addCosmicObjectsToAlgolia = async (
   cosmic: any,
   algoliaClient: any,
   index: any,
   toast: any,
-  setTypeSending: any
+  setSending: any,
+  cosmicProps: string
 ) => {
-  setTypeSending(index)
+  setSending(true)
   let error = false
   const algoliaIndex = algoliaClient.initIndex(index)
-  const data = await getCosmicObjects(cosmic, index, count, 0)
+  const data = await getCosmicObjects(cosmic, index, count, 0, cosmicProps)
   // Add ObjectIDs
   const objects = makeObjectIds(data.objects)
   try {
@@ -65,7 +78,13 @@ const addCosmicObjectsToAlgolia = async (
   // Pagination
   if (data.total > count) {
     for (let skip = count; skip < Number(data.total); skip = skip + count) {
-      const data = await getCosmicObjects(cosmic, index, index, skip)
+      const data = await getCosmicObjects(
+        cosmic,
+        index,
+        index,
+        skip,
+        cosmicProps
+      )
       const objects = makeObjectIds(data.objects)
       try {
         const addObjectsRes = await algoliaIndex.saveObjects(objects)
@@ -87,31 +106,21 @@ const addCosmicObjectsToAlgolia = async (
       title: "Index successfully added to Algolia!",
     })
   }
-  setTypeSending("")
+  setSending(false)
 }
 
 const getCosmicObjects = async (
   cosmic: any,
   type: string,
   limit: number,
-  skip: number
+  skip: number,
+  cosmicProps: string
 ) => {
   const data = await cosmic.objects
     .find({
       type: type,
     })
-    .props([
-      "id",
-      "content",
-      "created_at",
-      "metadata",
-      "modified_at",
-      "published_at",
-      "slug",
-      "title",
-      "type",
-      "locale",
-    ])
+    .props(cosmicProps)
     .depth(0)
     .skip(skip)
     .limit(limit)
@@ -132,10 +141,37 @@ const Hit: React.FunctionComponent<HitProps> = ({ hit }) => {
   )
 }
 
+const TypesSelect = (
+  props: { types: { title: string; slug: string }[]; setType: any } | undefined
+) => {
+  return (
+    <Select
+      onValueChange={(data) => {
+        props?.setType(data)
+      }}
+    >
+      <SelectTrigger className="w-[260px]">
+        <SelectValue placeholder="Select an Object type" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {props?.types?.map((type: { title: string; slug: string }) => (
+            <SelectItem value={type.slug} key={type.slug}>
+              {type.title}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  )
+}
+
 const TypesForm = (
   props: { types: { title: string; slug: string }[] } | undefined
 ): JSX.Element => {
-  const [sending, setTypeSending] = useState()
+  const [sending, setSending] = useState(false)
+  const [cosmicProps, setCosmicProps] = useState(defaultProps)
+  const [type, setType] = useState("")
   // Get API keys from URL
   const searchParams = useSearchParams()
   const bucketSlug = searchParams.get("bucket_slug") ?? ""
@@ -148,56 +184,77 @@ const TypesForm = (
   })
   const algoliaClient = algoliasearch(algoliaId, algoliaAdminKey)
   const { toast } = useToast()
-  const list = props?.types.map((type: { title: string; slug: string }) => {
-    return (
-      <div className="mb-4 w-full" key={type.slug}>
-        <div>{type.title}</div>
-        <Button
-          onClick={() =>
-            addCosmicObjectsToAlgolia(
-              cosmic,
-              algoliaClient,
-              type.slug,
-              toast,
-              setTypeSending
-            )
-          }
-          className="mr-3"
-        >
-          {sending === type.slug ? "Sending... " : "Sync Objects"}
-        </Button>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="outline">Test in Search</Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogCancel className="absolute right-1 top-1 border-0">
-              <Cross1Icon />
-            </AlertDialogCancel>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Index Results</AlertDialogTitle>
-              <InstantSearch searchClient={algoliaClient} indexName={type.slug}>
-                <Configure hitsPerPage={10} />
-                <SearchBox autoFocus />
-                <Hits
-                  hitComponent={Hit}
-                  className="h-[400px] overflow-scroll"
-                />
-                <Pagination />
-              </InstantSearch>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>
-                Close <span className="ml-2 text-gray-300">(esc)</span>
-              </AlertDialogCancel>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-        <Toaster />
+  if (!props) return <></>
+  return (
+    <div className="mb-12 w-full">
+      <div className="mb-4">
+        <TypesSelect types={props.types} setType={setType} />
       </div>
-    )
-  })
-  return <>{list}</>
+      {type && (
+        <>
+          <div className="mb-4">
+            Use the input field to select which props to include (comma
+            separated). Note: id is required.
+          </div>
+          <div className="mb-2 flex w-[600px]">
+            <Input
+              type="text"
+              placeholder="Props"
+              value={cosmicProps}
+              onChange={(data) => {
+                setCosmicProps(data.target.value)
+              }}
+            />
+          </div>
+          <div className="mb-2 flex w-[600px]">
+            <Button
+              onClick={() =>
+                addCosmicObjectsToAlgolia(
+                  cosmic,
+                  algoliaClient,
+                  type,
+                  toast,
+                  setSending,
+                  cosmicProps
+                )
+              }
+              className="mr-3"
+            >
+              {sending ? "Sending... " : "Sync Objects"}
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline">Test in Search</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogCancel className="absolute right-1 top-1 border-0">
+                  <Cross1Icon />
+                </AlertDialogCancel>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Index Results</AlertDialogTitle>
+                  <InstantSearch searchClient={algoliaClient} indexName={type}>
+                    <Configure hitsPerPage={10} />
+                    <SearchBox autoFocus />
+                    <Hits
+                      hitComponent={Hit}
+                      className="h-[400px] overflow-scroll"
+                    />
+                    <Pagination />
+                  </InstantSearch>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>
+                    Close <span className="ml-2 text-gray-300">(esc)</span>
+                  </AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </>
+      )}
+      <Toaster />
+    </div>
+  )
 }
 
 export default TypesForm
