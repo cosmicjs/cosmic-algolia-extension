@@ -235,7 +235,7 @@ const TypesForm = (
                   <Cross1Icon />
                 </AlertDialogCancel>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Index Results</AlertDialogTitle>
+                  <AlertDialogTitle>Index results for {type}</AlertDialogTitle>
                   <InstantSearch searchClient={algoliaClient} indexName={type}>
                     <Configure hitsPerPage={10} />
                     <SearchBox autoFocus />
