@@ -38,7 +38,7 @@ export default async function IndexPage({
       <h1 className="bold text-3xl">Algolia Extension</h1>
       {!hasCosmicContent && (
         <div>
-          You don't have any Object types yet. You need to add content to your
+          You do not have any Object types yet. You need to add content to your
           Bucket first before using this extension.
         </div>
       )}
