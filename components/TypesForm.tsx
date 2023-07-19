@@ -29,7 +29,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -151,7 +150,10 @@ const TypesSelect = (
       }}
     >
       <SelectTrigger className="w-[260px]">
-        <SelectValue placeholder="Select an Object type" />
+        <SelectValue
+          placeholder="Select an Object type"
+          className="cursor-pointer"
+        />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
@@ -197,8 +199,23 @@ const TypesForm = (
       {type && (
         <>
           <div className="mb-4">
-            Use the input field to select which props to include (comma
-            separated). Note: id is required.
+            <p>
+              Use the input field to select which props to include (comma
+              separated).
+            </p>
+            <p>
+              Note: 1) id is required. 2) If you get an Object size error, use
+              props to limit your payload size. See{" "}
+              <a
+                className="text-blue-700"
+                href="https://www.cosmicjs.com/docs/api/objects#get-objects"
+                target="_blank"
+                rel="noreferrer"
+              >
+                the Cosmic docs
+              </a>{" "}
+              for more info.
+            </p>
           </div>
           <div className="mb-2 flex w-[600px]">
             <Input

@@ -50,8 +50,8 @@ export default async function IndexPage({
       {hasCosmicContent && algoliaKeysAvailable && (
         <>
           <p>
-            Select with Object types to add to Algolia. Existing Objects will be
-            updated.
+            Select which Object types to add to Algolia. Existing Objects will
+            be updated.
           </p>
           <div className="mb-4">
             <div className="mb-8">
