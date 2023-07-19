@@ -1,74 +1,104 @@
-'use client'
+"use client"
 
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams } from "next/navigation"
+import { createBucketClient } from "@cosmicjs/sdk"
+import algoliasearch from "algoliasearch"
+
 import { Button } from "@/components/ui/button"
 
-import { createBucketClient } from '@cosmicjs/sdk'
+// Helpers
+const makeObjectIds = (objects: []) => {
+  const objectsWIds = objects.map((object: any) => {
+    return { objectID: object.id, ...object }
+  })
+  return objectsWIds
+}
 
-const addCosmicObjectsToAlgolia = async (cosmic: any, applicationId: any, adminApiKey: any, index: any) => {
-  const client = algoliasearch(applicationId, adminApiKey);
-  const algoliaIndex = client.initIndex(index);
-  const data = await getCosmicObjects('posts', 1, 0);
-  const addObjectsRes = await algoliaIndex.addObjects(data.objects);
-  const { taskID } = addObjectsRes;
-  await algoliaIndex.waitTask(taskID);
+// Home many Objects to get
+const count = 5
+
+const addCosmicObjectsToAlgolia = async (
+  cosmic: any,
+  algoliaClient: any,
+  index: any
+) => {
+  const algoliaIndex = algoliaClient.initIndex(index)
+  const data = await getCosmicObjects(cosmic, index, count, 0)
+  // Add ObjectIDs
+  const objects = makeObjectIds(data.objects)
+  const addObjectsRes = await algoliaIndex.saveObjects(objects)
+  const { taskIDs } = addObjectsRes
+  await algoliaIndex.waitTask(taskIDs[0])
   // Pagination
-  if (data.total > 10) {
-    for (let skip = 10; skip < data.total; skip = skip + 10) {
-      const data = await getCosmicObjects(cosmic, 'posts', index, skip);
-      const addObjectsRes = await algoliaIndex.addObjects(data.objects);
-      const { taskID } = addObjectsRes;
-      await algoliaIndex.waitTask(taskID);
+  if (data.total > count) {
+    for (let skip = count; skip < Number(data.total); skip = skip + count) {
+      const data = await getCosmicObjects(cosmic, index, index, skip)
+      const objects = makeObjectIds(data.objects)
+      const addObjectsRes = await algoliaIndex.saveObjects(objects)
+      const { taskIDs } = addObjectsRes
+      await algoliaIndex.waitTask(taskIDs[0])
     }
   }
 }
 
-const getCosmicObjects = async (cosmic: any, type: string, limit: number, skip: number) => {
-  const data = await cosmic.objects.find({
-    "type": type
-  })
-  .props([
-    'content',
-    'created_at',
-    'metadata',
-    'modified_at',
-    'published_at',
-    'slug',
-    'title',
-    'type',
-    'locale'
-  ])
-  .depth(0)
-  .skip(skip)
-  .limit(limit)
-  return data;
+const getCosmicObjects = async (
+  cosmic: any,
+  type: string,
+  limit: number,
+  skip: number
+) => {
+  const data = await cosmic.objects
+    .find({
+      type: type,
+    })
+    .props([
+      "id",
+      "content",
+      "created_at",
+      "metadata",
+      "modified_at",
+      "published_at",
+      "slug",
+      "title",
+      "type",
+      "locale",
+    ])
+    .depth(0)
+    .skip(skip)
+    .limit(limit)
+  return data
 }
 
-async function sendToAlgolia(cosmic: any, type: string) {
-  const data = await getCosmicObjects(cosmic, type, 10, 0)
-  console.log(data)
-}
-
-const Form = (props: { types: { title: string; slug: string }[] } | undefined) => {
+const Form = (
+  props: { types: { title: string; slug: string }[] } | undefined
+) => {
+  // Get API keys from URL
   const searchParams = useSearchParams()
+  const bucketSlug = searchParams.get("bucket_slug") ?? ""
+  const readKey = searchParams.get("read_key") ?? ""
+  const algoliaId = searchParams.get("algolia_application_id") ?? ""
+  const algoliaAdminKey = searchParams.get("algolia_admin_key") ?? ""
   const cosmic = createBucketClient({
-    bucketSlug: searchParams.get('bucket_slug'),
-    readKey: searchParams.get('read_key')
+    bucketSlug,
+    readKey,
   })
-  if (!props)
-    return
-  const list = props.types.map((type: { title: string; slug: string; }) => {
-    return <div className="mb-4 ml-3 w-full">
-        <div className="w-[200px]">
-          {type.title}
-        </div>
-        <Button onClick={() => sendToAlgolia(cosmic, type.slug)}>Sync with Algolia</Button>
-    </div>
+  const algoliaClient = algoliasearch(algoliaId, algoliaAdminKey)
+  if (!props) return
+  const list = props.types.map((type: { title: string; slug: string }) => {
+    return (
+      <div className="mb-4 w-full" key={type.slug}>
+        <div className="w-[200px]">{type.title}</div>
+        <Button
+          onClick={() =>
+            addCosmicObjectsToAlgolia(cosmic, algoliaClient, type.slug)
+          }
+        >
+          Sync with Algolia
+        </Button>
+      </div>
+    )
   })
-  return <>
-    {list}
-  </>
+  return list
 }
 
-
-export default Form;
+export default Form
