@@ -7,7 +7,6 @@ import { Cross1Icon } from "@radix-ui/react-icons"
 import algoliasearch from "algoliasearch"
 import {
   Configure,
-  Highlight,
   Hits,
   InstantSearch,
   Pagination,
@@ -133,9 +132,9 @@ const Hit: React.FunctionComponent<HitProps> = ({ hit }) => {
   )
 }
 
-const Form = (
+const TypesForm = (
   props: { types: { title: string; slug: string }[] } | undefined
-) => {
+): JSX.Element => {
   const [sending, setTypeSending] = useState()
   // Get API keys from URL
   const searchParams = useSearchParams()
@@ -149,8 +148,7 @@ const Form = (
   })
   const algoliaClient = algoliasearch(algoliaId, algoliaAdminKey)
   const { toast } = useToast()
-  if (!props) return
-  const list = props.types.map((type: { title: string; slug: string }) => {
+  const list = props?.types.map((type: { title: string; slug: string }) => {
     return (
       <div className="mb-4 w-full" key={type.slug}>
         <div>{type.title}</div>
@@ -199,7 +197,7 @@ const Form = (
       </div>
     )
   })
-  return list
+  return <>{list}</>
 }
 
-export default Form
+export default TypesForm
