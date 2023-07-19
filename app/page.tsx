@@ -34,7 +34,7 @@ export default async function IndexPage({
 
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
-      <h1 className="bold text-2xl">Algolia Extension</h1>
+      <h1 className="bold text-3xl">Algolia Extension</h1>
       {!hasCosmicContent && (
         <div>
           You don't have any Object types yet. You need to add content to your
@@ -43,7 +43,6 @@ export default async function IndexPage({
       )}
       {hasCosmicContent && algoliaKeysAvailable && (
         <>
-          <h2>Object types</h2>
           <p>Add the following Object types to Algolia:</p>
           <div className="mb-4">
             <div className="mb-4">

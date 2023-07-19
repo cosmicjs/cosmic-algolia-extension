@@ -1,10 +1,31 @@
 "use client"
 
+import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { createBucketClient } from "@cosmicjs/sdk"
+import { Cross1Icon } from "@radix-ui/react-icons"
 import algoliasearch from "algoliasearch"
+import {
+  Configure,
+  Highlight,
+  Hits,
+  InstantSearch,
+  Pagination,
+  SearchBox,
+} from "react-instantsearch-hooks-web"
 
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Toaster } from "@/components/ui/toaster"
+import { useToast } from "@/components/ui/use-toast"
 
 // Helpers
 const makeObjectIds = (objects: []) => {
@@ -15,30 +36,59 @@ const makeObjectIds = (objects: []) => {
 }
 
 // Home many Objects to get
-const count = 5
+const count = 10
 
 const addCosmicObjectsToAlgolia = async (
   cosmic: any,
   algoliaClient: any,
-  index: any
+  index: any,
+  toast: any,
+  setTypeSending: any
 ) => {
+  setTypeSending(index)
+  let error = false
   const algoliaIndex = algoliaClient.initIndex(index)
   const data = await getCosmicObjects(cosmic, index, count, 0)
   // Add ObjectIDs
   const objects = makeObjectIds(data.objects)
-  const addObjectsRes = await algoliaIndex.saveObjects(objects)
-  const { taskIDs } = addObjectsRes
-  await algoliaIndex.waitTask(taskIDs[0])
+  try {
+    const addObjectsRes = await algoliaIndex.saveObjects(objects)
+    const { taskIDs } = addObjectsRes
+    await algoliaIndex.waitTask(taskIDs[0])
+  } catch (e) {
+    toast({
+      variant: "destructive",
+      title: "Something went wrong saving to Algolia",
+      description: e.message,
+    })
+    error = true
+  }
   // Pagination
   if (data.total > count) {
     for (let skip = count; skip < Number(data.total); skip = skip + count) {
       const data = await getCosmicObjects(cosmic, index, index, skip)
       const objects = makeObjectIds(data.objects)
-      const addObjectsRes = await algoliaIndex.saveObjects(objects)
-      const { taskIDs } = addObjectsRes
-      await algoliaIndex.waitTask(taskIDs[0])
+      try {
+        const addObjectsRes = await algoliaIndex.saveObjects(objects)
+        const { taskIDs } = addObjectsRes
+        await algoliaIndex.waitTask(taskIDs[0])
+      } catch (e) {
+        toast({
+          variant: "destructive",
+          title: "Something went wrong saving to Algolia",
+          description: e.message,
+        })
+        error = true
+        break
+      }
     }
   }
+  if (!error) {
+    toast({
+      title: "Index successfully added to Algolia!",
+    })
+  }
+  setTypeSending("")
 }
 
 const getCosmicObjects = async (
@@ -69,9 +119,19 @@ const getCosmicObjects = async (
   return data
 }
 
+function Hit({ hit }): { title: string } {
+  return (
+    <article>
+      <p>{hit.title}</p>
+      <Highlight attribute="name" hit={hit} />
+    </article>
+  )
+}
+
 const Form = (
   props: { types: { title: string; slug: string }[] } | undefined
 ) => {
+  const [sending, setTypeSending] = useState()
   // Get API keys from URL
   const searchParams = useSearchParams()
   const bucketSlug = searchParams.get("bucket_slug") ?? ""
@@ -83,18 +143,54 @@ const Form = (
     readKey,
   })
   const algoliaClient = algoliasearch(algoliaId, algoliaAdminKey)
+  const { toast } = useToast()
   if (!props) return
   const list = props.types.map((type: { title: string; slug: string }) => {
     return (
       <div className="mb-4 w-full" key={type.slug}>
-        <div className="w-[200px]">{type.title}</div>
+        <div>{type.title}</div>
         <Button
           onClick={() =>
-            addCosmicObjectsToAlgolia(cosmic, algoliaClient, type.slug)
+            addCosmicObjectsToAlgolia(
+              cosmic,
+              algoliaClient,
+              type.slug,
+              toast,
+              setTypeSending
+            )
           }
+          className="mr-3"
         >
-          Sync with Algolia
+          {sending === type.slug ? "Sending... " : "Sync Objects"}
         </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline">Test in Search</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogCancel className="absolute right-1 top-1 border-0">
+              <Cross1Icon />
+            </AlertDialogCancel>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Index Results</AlertDialogTitle>
+              <InstantSearch searchClient={algoliaClient} indexName={type.slug}>
+                <Configure hitsPerPage={10} />
+                <SearchBox autoFocus />
+                <Hits
+                  hitComponent={Hit}
+                  className="h-[400px] overflow-scroll"
+                />
+                <Pagination />
+              </InstantSearch>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                Close <span className="ml-2 text-gray-300">(esc)</span>
+              </AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        <Toaster />
       </div>
     )
   })
