@@ -8,7 +8,10 @@ export default async function IndexPage({
   searchParams,
 }: {
   params: { slug: string }
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: {
+    bucket_slug: string
+    read_key: string
+  }
 }) {
   const { bucket_slug, read_key, algolia_application_id, algolia_admin_key } =
     searchParams

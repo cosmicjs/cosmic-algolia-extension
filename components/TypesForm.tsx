@@ -55,7 +55,7 @@ const addCosmicObjectsToAlgolia = async (
     const addObjectsRes = await algoliaIndex.saveObjects(objects)
     const { taskIDs } = addObjectsRes
     await algoliaIndex.waitTask(taskIDs[0])
-  } catch (e) {
+  } catch (e: any) {
     toast({
       variant: "destructive",
       title: "Something went wrong saving to Algolia",
@@ -72,7 +72,7 @@ const addCosmicObjectsToAlgolia = async (
         const addObjectsRes = await algoliaIndex.saveObjects(objects)
         const { taskIDs } = addObjectsRes
         await algoliaIndex.waitTask(taskIDs[0])
-      } catch (e) {
+      } catch (e: any) {
         toast({
           variant: "destructive",
           title: "Something went wrong saving to Algolia",
@@ -119,11 +119,16 @@ const getCosmicObjects = async (
   return data
 }
 
-function Hit({ hit }): { title: string } {
+type HitProps = {
+  hit: {
+    title: string
+  }
+}
+
+const Hit: React.FunctionComponent<HitProps> = ({ hit }) => {
   return (
     <article>
       <p>{hit.title}</p>
-      <Highlight attribute="name" hit={hit} />
     </article>
   )
 }
