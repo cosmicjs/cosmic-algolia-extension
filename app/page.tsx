@@ -112,15 +112,9 @@ export default async function IndexPage({
             <span className="font-bold">Admin API key</span>
           </div>
           <div>
-            4. In your Cosmic dashboard, go to this{" "}
-            <a
-              href={`https://app.cosmicjs.com/${bucket_slug}/extensions/marketplace`}
-              target="_parent"
-              className="text-blue-700"
-            >
-              Extension / Settings
-            </a>{" "}
-            and add the following query parameters:
+            4. In your Cosmic dashboard, go to the settings page for this
+            Extension (hover over the sidebar link and click the cog icon), and
+            add the following query parameters:
           </div>
           <div>
             <img
