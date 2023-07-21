@@ -49,6 +49,7 @@ export default async function IndexPage({
       )}
       {hasCosmicContent && algoliaKeysAvailable && (
         <>
+          <h3 className="font-bold">Select your Object type</h3>
           <p>
             Select which Object types to add to Algolia. Existing Objects will
             be updated.

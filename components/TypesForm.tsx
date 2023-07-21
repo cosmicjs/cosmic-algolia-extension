@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { createBucketClient } from "@cosmicjs/sdk"
 import { Cross1Icon } from "@radix-ui/react-icons"
 import algoliasearch from "algoliasearch"
+import { Loader2 } from "lucide-react"
 import {
   Configure,
   Hits,
@@ -13,16 +14,15 @@ import {
   SearchBox,
 } from "react-instantsearch-hooks-web"
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -47,66 +47,6 @@ const makeObjectIds = (objects: []) => {
 const count = 10
 const defaultProps =
   "id,content,created_at,metadata,modified_at,published_at,slug,title,type,locale"
-
-const addCosmicObjectsToAlgolia = async (
-  cosmic: any,
-  algoliaClient: any,
-  index: any,
-  toast: any,
-  setSending: any,
-  cosmicProps: string
-) => {
-  setSending(true)
-  let error = false
-  const algoliaIndex = algoliaClient.initIndex(index)
-  const data = await getCosmicObjects(cosmic, index, count, 0, cosmicProps)
-  // Add ObjectIDs
-  const objects = makeObjectIds(data.objects)
-  try {
-    const addObjectsRes = await algoliaIndex.saveObjects(objects)
-    const { taskIDs } = addObjectsRes
-    await algoliaIndex.waitTask(taskIDs[0])
-  } catch (e: any) {
-    toast({
-      variant: "destructive",
-      title: "Something went wrong saving to Algolia",
-      description: e.message,
-    })
-    error = true
-  }
-  // Pagination
-  if (data.total > count) {
-    for (let skip = count; skip < Number(data.total); skip = skip + count) {
-      const data = await getCosmicObjects(
-        cosmic,
-        index,
-        index,
-        skip,
-        cosmicProps
-      )
-      const objects = makeObjectIds(data.objects)
-      try {
-        const addObjectsRes = await algoliaIndex.saveObjects(objects)
-        const { taskIDs } = addObjectsRes
-        await algoliaIndex.waitTask(taskIDs[0])
-      } catch (e: any) {
-        toast({
-          variant: "destructive",
-          title: "Something went wrong saving to Algolia",
-          description: e.message,
-        })
-        error = true
-        break
-      }
-    }
-  }
-  if (!error) {
-    toast({
-      title: "Index successfully added to Algolia!",
-    })
-  }
-  setSending(false)
-}
 
 const getCosmicObjects = async (
   cosmic: any,
@@ -175,7 +115,7 @@ const TypesSelect = (
 const TypesForm = (
   props: { types: { title: string; slug: string }[] } | undefined
 ): JSX.Element => {
-  const [sending, setSending] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [cosmicProps, setCosmicProps] = useState(defaultProps)
   const [type, setType] = useState("")
   // Get API keys from URL
@@ -190,6 +130,63 @@ const TypesForm = (
   })
   const algoliaClient = algoliasearch(algoliaId, algoliaAdminKey)
   const { toast } = useToast()
+
+  const handleSubmit = useCallback(
+    async (e: React.SyntheticEvent) => {
+      setSubmitting(true)
+      let error = false
+      const algoliaIndex = algoliaClient.initIndex(type)
+      const data = await getCosmicObjects(cosmic, type, count, 0, cosmicProps)
+      // Add ObjectIDs
+      const objects = makeObjectIds(data.objects)
+      try {
+        const addObjectsRes = await algoliaIndex.saveObjects(objects)
+        const { taskIDs } = addObjectsRes
+        await algoliaIndex.waitTask(taskIDs[0])
+      } catch (e: any) {
+        toast({
+          variant: "destructive",
+          title: "Something went wrong saving to Algolia",
+          description: e.message,
+        })
+        error = true
+      }
+      // Pagination
+      if (data.total > count) {
+        for (let skip = count; skip < Number(data.total); skip = skip + count) {
+          const data = await getCosmicObjects(
+            cosmic,
+            index,
+            index,
+            skip,
+            cosmicProps
+          )
+          const objects = makeObjectIds(data.objects)
+          try {
+            const addObjectsRes = await algoliaIndex.saveObjects(objects)
+            const { taskIDs } = addObjectsRes
+            await algoliaIndex.waitTask(taskIDs[0])
+          } catch (e: any) {
+            toast({
+              variant: "destructive",
+              title: "Something went wrong saving to Algolia",
+              description: e.message,
+            })
+            error = true
+            break
+          }
+        }
+      }
+      if (!error) {
+        toast({
+          title: "Index successfully added to Algolia!",
+        })
+      }
+      setSubmitting(false)
+    },
+    [toast, type, cosmic, algoliaClient, cosmicProps, setSubmitting]
+  )
+
   if (!props) return <></>
   return (
     <div className="mb-12 w-full">
@@ -198,23 +195,32 @@ const TypesForm = (
       </div>
       {type && (
         <>
-          <div className="mb-4">
+          <div className="mb-2">
+            <h3 className="font-bold">Set your props</h3>
             <p>
-              Use the input field to select which props to include (comma
+              Use the input field below to select which props to include (comma
               separated).
             </p>
+          </div>
+          <div className="mb-4">
             <p>
-              Note: 1) id is required. 2) If you get an Object size error, use
-              props to limit your payload size. See{" "}
-              <a
-                className="text-blue-700"
-                href="https://www.cosmicjs.com/docs/api/objects#get-objects"
-                target="_blank"
-                rel="noreferrer"
-              >
-                the Cosmic docs
-              </a>{" "}
-              for more info.
+              * Note:
+              <ol>
+                <li className="ml-2">1. id is required.</li>
+                <li className="ml-2">
+                  2. If you get an Object size error, use props to limit your
+                  payload size. See{" "}
+                  <a
+                    className="text-blue-700"
+                    href="https://www.cosmicjs.com/docs/api/objects#get-objects"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    the Cosmic docs
+                  </a>{" "}
+                  for more info.
+                </li>
+              </ol>
             </p>
           </div>
           <div className="mb-2 flex w-[600px]">
@@ -228,22 +234,48 @@ const TypesForm = (
             />
           </div>
           <div className="mb-2 flex w-[600px]">
-            <Button
-              onClick={() =>
-                addCosmicObjectsToAlgolia(
-                  cosmic,
-                  algoliaClient,
-                  type,
-                  toast,
-                  setSending,
-                  cosmicProps
-                )
-              }
-              className="mr-3"
-            >
-              {sending ? "Sending... " : "Sync Objects"}
-            </Button>
-            <AlertDialog>
+            <div className="mr-2">
+              <Button
+                disabled={submitting}
+                type="submit"
+                variant="default"
+                size={submitting ? "icon" : "default"}
+                onClick={handleSubmit}
+              >
+                {submitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Submit"
+                )}
+              </Button>
+            </div>
+            <div>
+              <Dialog>
+                <DialogTrigger>
+                  <Button variant="outline">Test in Search</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Index results for {type}</DialogTitle>
+                    <DialogDescription>
+                      <InstantSearch
+                        searchClient={algoliaClient}
+                        indexName={type}
+                      >
+                        <Configure hitsPerPage={10} />
+                        <SearchBox autoFocus />
+                        <Hits
+                          hitComponent={Hit}
+                          className="h-[400px] overflow-scroll"
+                        />
+                        <Pagination />
+                      </InstantSearch>
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </div>
+            {/* <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline">Test in Search</Button>
               </AlertDialogTrigger>
@@ -269,7 +301,7 @@ const TypesForm = (
                   </AlertDialogCancel>
                 </AlertDialogFooter>
               </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog> */}
           </div>
         </>
       )}
