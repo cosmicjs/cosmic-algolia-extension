@@ -123,7 +123,7 @@ export default async function IndexPage({
               className="w-[800px]"
             />
           </div>
-          <div>Here are the exact keys to add, for your copy/paste:</div>
+          <div>Here are the exact keys to add, for you to copy/paste:</div>
           <div>
             <code>algolia_application_id</code>
           </div>
