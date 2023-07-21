@@ -43,28 +43,10 @@ const makeObjectIds = (objects: []) => {
   return objectsWIds
 }
 
-// Home many Objects to get
+// How many Objects to get at a time
 const count = 10
 const defaultProps =
   "id,content,created_at,metadata,modified_at,published_at,slug,title,type,locale"
-
-const getCosmicObjects = async (
-  cosmic: any,
-  type: string,
-  limit: number,
-  skip: number,
-  cosmicProps: string
-) => {
-  const data = await cosmic.objects
-    .find({
-      type: type,
-    })
-    .props(cosmicProps)
-    .depth(0)
-    .skip(skip)
-    .limit(limit)
-  return data
-}
 
 type HitProps = {
   hit: {
@@ -136,7 +118,13 @@ const TypesForm = (
       setSubmitting(true)
       let error = false
       const algoliaIndex = algoliaClient.initIndex(type)
-      const data = await getCosmicObjects(cosmic, type, count, 0, cosmicProps)
+      const data = await cosmic.objects
+        .find({
+          type: type,
+        })
+        .props(cosmicProps)
+        .depth(0)
+        .limit(count)
       // Add ObjectIDs
       const objects = makeObjectIds(data.objects)
       try {
@@ -154,13 +142,14 @@ const TypesForm = (
       // Pagination
       if (data.total > count) {
         for (let skip = count; skip < Number(data.total); skip = skip + count) {
-          const data = await getCosmicObjects(
-            cosmic,
-            index,
-            index,
-            skip,
-            cosmicProps
-          )
+          const data = await cosmic.objects
+            .find({
+              type: type,
+            })
+            .props(cosmicProps)
+            .depth(0)
+            .skip(skip)
+            .limit(count)
           const objects = makeObjectIds(data.objects)
           try {
             const addObjectsRes = await algoliaIndex.saveObjects(objects)
@@ -275,33 +264,6 @@ const TypesForm = (
                 </DialogContent>
               </Dialog>
             </div>
-            {/* <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline">Test in Search</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogCancel className="absolute right-1 top-1 border-0">
-                  <Cross1Icon />
-                </AlertDialogCancel>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Index results for {type}</AlertDialogTitle>
-                  <InstantSearch searchClient={algoliaClient} indexName={type}>
-                    <Configure hitsPerPage={10} />
-                    <SearchBox autoFocus />
-                    <Hits
-                      hitComponent={Hit}
-                      className="h-[400px] overflow-scroll"
-                    />
-                    <Pagination />
-                  </InstantSearch>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>
-                    Close <span className="ml-2 text-gray-300">(esc)</span>
-                  </AlertDialogCancel>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog> */}
           </div>
         </>
       )}
