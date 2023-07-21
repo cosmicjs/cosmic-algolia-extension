@@ -4,7 +4,6 @@ import { createBucketClient } from "@cosmicjs/sdk"
 import TypesForm from "@/components/TypesForm"
 
 export default async function IndexPage({
-  params,
   searchParams,
 }: {
   params: { slug: string }
