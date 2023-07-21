@@ -45,8 +45,7 @@ const makeObjectIds = (objects: []) => {
 
 // How many Objects to get at a time
 const count = 10
-const defaultProps =
-  "id,content,created_at,metadata,modified_at,published_at,slug,title,type,locale"
+const defaultProps = "id,title,content,metadata,locale"
 
 type HitProps = {
   hit: {
@@ -187,8 +186,8 @@ const TypesForm = (
           <div className="mb-2">
             <h3 className="font-bold">Set your props</h3>
             <p>
-              Use the input field below to select which props to include (comma
-              separated).
+              Use the input field below to select which Object properties to
+              include in your search (comma separated).
             </p>
           </div>
           <div className="mb-4">

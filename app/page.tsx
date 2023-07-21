@@ -48,16 +48,18 @@ export default async function IndexPage({
       )}
       {hasCosmicContent && algoliaKeysAvailable && (
         <>
-          <h3 className="font-bold">Select your Object type</h3>
-          <p>
-            Select which Object types to add to Algolia. Existing Objects will
-            be updated.
-          </p>
+          <div>
+            <h3 className="font-bold">Select your Object type</h3>
+            <div>
+              Select which Object types to add to Algolia. Existing Objects will
+              be updated.
+            </div>
+          </div>
           <div className="mb-4">
             <div className="mb-8">
               <TypesForm types={typesTrimmed} />
             </div>
-            <h2 className="mb-2 text-xl">More options</h2>
+            <h3 className="font-bold">More options</h3>
             <div>
               If you would like to add / edit facets and other search settings,
               you can do this in your{" "}
