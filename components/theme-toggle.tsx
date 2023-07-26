@@ -11,7 +11,10 @@ export function ThemeToggle() {
   const searchParams = useSearchParams()
   const dashboardTheme = searchParams.get("theme")
   const { setTheme, theme } = useTheme()
-  if (dashboardTheme) return setTheme(dashboardTheme)
+  if (dashboardTheme) {
+    setTheme(dashboardTheme)
+    return <></>
+  }
   return (
     <Button
       variant="ghost"
