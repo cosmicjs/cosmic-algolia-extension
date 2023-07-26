@@ -254,7 +254,7 @@ const TypesForm = (
                         <SearchBox autoFocus />
                         <Hits
                           hitComponent={Hit}
-                          className="h-[400px] overflow-scroll"
+                          className="my-4 h-[400px] overflow-scroll rounded-xl bg-gray-600"
                         />
                         <Pagination />
                       </InstantSearch>

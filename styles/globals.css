@@ -79,3 +79,24 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+
+.dark .ais-SearchBox .ais-SearchBox-form {
+  @apply bg-background
+}
+.dark .ais-SearchBox .ais-SearchBox-input {
+  @apply bg-gray-800
+}
+.dark .ais-SearchBox .ais-SearchBox-input {
+  @apply border-none
+}
+.dark .ais-Hits-list,
+.dark .ais-Hits-item {
+  @apply bg-gray-600 text-gray-100
+}
+.dark .ais-Hits-item {
+  @apply border-gray-500 border-b
+}
+/* .dark .ais-Pagination-list .ais-Pagination-item .ais-Pagination-link {
+  @apply text-white bg-slate-400
+} */
