@@ -38,7 +38,7 @@ export default async function IndexPage({
   }
 
   return (
-    <section className="container grid items-center gap-4 py-6 pb-8">
+    <section className="flex w-full max-w-3xl flex-col items-start gap-4 py-6 pb-8">
       <h1 className="bold text-3xl">Algolia Extension</h1>
       {!hasCosmicContent && (
         <div>
@@ -67,7 +67,7 @@ export default async function IndexPage({
                 href="https://dashboard.algolia.com/"
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-700"
+                className="font-semibold text-cosmic-blue-link dark:text-cosmic-bright-blue"
               >
                 Algolia dashboard
               </a>
@@ -82,13 +82,13 @@ export default async function IndexPage({
             You will need to add your Algolia keys to extension settings before
             using this extension. Follow these steps:
           </div>
-          <div>
-            1. Log in to your{" "}
+          <div className="mt-4">
+            Log in to your{" "}
             <a
               href="https://dashboard.algolia.com/"
               target="_blank"
               rel="noreferrer"
-              className="text-blue-700"
+              className="font-semibold text-cosmic-blue-link dark:text-cosmic-bright-blue"
             >
               Algolia dashboard
             </a>
@@ -101,7 +101,7 @@ export default async function IndexPage({
               className="w-[800px]"
             />
           </div>
-          <div>2. Go to Application / Settings / API keys.</div>
+          <div className="mt-4">Go to Application / Settings / API keys.</div>
           <div>
             <img
               src="https://imgix.cosmicjs.com/c4a15e50-266b-11ee-a19d-717742939f83-algolia-step-2.png?w=2000&auto=compression,format"
@@ -109,14 +109,14 @@ export default async function IndexPage({
               className="w-[800px]"
             />
           </div>
-          <div>
-            3. Copy your <span className="font-bold">Application ID</span> and{" "}
+          <div className="mt-4">
+            Copy your <span className="font-bold">Application ID</span> and{" "}
             <span className="font-bold">Admin API key</span>
           </div>
-          <div>
-            4. In your Cosmic dashboard, go to the settings page for this
-            Extension (hover over the sidebar link and click the cog icon), and
-            add the following query parameters:
+          <div className="mt-4">
+            In your Cosmic dashboard, go to the settings page for this Extension
+            (hover over the sidebar link and click the cog icon), and add the
+            following query parameters:
           </div>
           <div>
             <img
