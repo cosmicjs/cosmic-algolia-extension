@@ -125,8 +125,17 @@ const TypesForm = (
         .depth(0)
         .limit(count)
       // Add ObjectIDs
-      const objects = makeObjectIds(data.objects)
-      console.log('objects', objects)
+      let objects: { metadata: any[], [key: string]: any }[] = makeObjectIds(data.objects);
+      const { metadata, ...rest } = objects[0];
+
+      objects = [
+        {
+          ...rest,
+          metadata
+        }
+      ];
+
+      console.log('objects', objects);
       try {
         const addObjectsRes = await algoliaIndex.saveObjects(objects)
         const { taskIDs } = addObjectsRes
