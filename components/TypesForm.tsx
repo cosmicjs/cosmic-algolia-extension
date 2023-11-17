@@ -130,7 +130,7 @@ const TypesForm = (
         return (
           {
             ...rest,
-            metadata
+            ...metadata
           }
         )
       }));
