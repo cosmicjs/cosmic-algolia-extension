@@ -125,15 +125,15 @@ const TypesForm = (
         .depth(0)
         .limit(count)
       // Add ObjectIDs
-      let objects: { metadata: any[], [key: string]: any }[] = makeObjectIds(data.objects);
-      const { metadata, ...rest } = objects[0];
-
-      objects = [
-        {
-          ...rest,
-          metadata
-        }
-      ];
+      let objects: { metadata: any[], [key: string]: any }[] = makeObjectIds(data.objects.map((object: { [x: string]: any; metadata: any }) => {
+        const { metadata, ...rest } = object;
+        return (
+          {
+            ...rest,
+            metadata
+          }
+        )
+      }));
 
       console.log('objects', objects);
       try {
