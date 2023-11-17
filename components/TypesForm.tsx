@@ -126,6 +126,7 @@ const TypesForm = (
         .limit(count)
       // Add ObjectIDs
       const objects = makeObjectIds(data.objects)
+      console.log('objects', objects)
       try {
         const addObjectsRes = await algoliaIndex.saveObjects(objects)
         const { taskIDs } = addObjectsRes
