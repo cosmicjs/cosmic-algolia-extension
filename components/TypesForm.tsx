@@ -125,7 +125,7 @@ const TypesForm = (
         .depth(0)
         .limit(count)
       // Add ObjectIDs
-      let objects: { metadata: any[], [key: string]: any }[] = makeObjectIds(data.objects.map((object: { [x: string]: any; metadata: any }) => {
+      const objects: { metadata: any[], [key: string]: any }[] = makeObjectIds(data.objects.map((object: { [x: string]: any; metadata: any }) => {
         const { metadata, ...rest } = object;
         return (
           {
@@ -135,7 +135,7 @@ const TypesForm = (
         )
       }));
 
-      console.log('objects', objects);
+      console.log('objects 1', objects);
       try {
         const addObjectsRes = await algoliaIndex.saveObjects(objects)
         const { taskIDs } = addObjectsRes
@@ -159,7 +159,17 @@ const TypesForm = (
             .depth(0)
             .skip(skip)
             .limit(count)
-          const objects = makeObjectIds(data.objects)
+            const objects: { metadata: any[], [key: string]: any }[] = makeObjectIds(data.objects.map((object: { [x: string]: any; metadata: any }) => {
+              const { metadata, ...rest } = object;
+              return (
+                {
+                  ...rest,
+                  ...metadata
+                }
+              )
+            }));
+            console.log('objects 2', objects);
+
           try {
             const addObjectsRes = await algoliaIndex.saveObjects(objects)
             const { taskIDs } = addObjectsRes
