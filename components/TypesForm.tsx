@@ -35,11 +35,29 @@ import {
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/components/ui/use-toast"
 
+interface MetadataObject {
+  [key: string]: string | MetadataObject | undefined;
+}
+
 // Helpers
 const makeObjectIds = (objects: []) => {
   const objectsWIds = objects.map((object: any) => {
-    return { objectID: object.id, ...object }
-  })
+    const { metadata, ...rest } = object;
+    return { objectID: object.id, ...rest, ...metadata }
+  }).map((item) => {
+    const newItem: MetadataObject = { ...item };
+  
+    for (const [key, value] of Object.entries(newItem)) {
+      if (typeof value === 'object' && value?.value) {
+        console.log(value.value);
+        newItem[key] = value.value;
+      }
+    }
+  
+    return newItem;
+  });
+  
+  
   return objectsWIds
 }
 
@@ -125,15 +143,7 @@ const TypesForm = (
         .depth(0)
         .limit(count)
       // Add ObjectIDs
-      const objects: { metadata: any[], [key: string]: any }[] = makeObjectIds(data.objects.map((object: { [x: string]: any; metadata: any }) => {
-        const { metadata, ...rest } = object;
-        return (
-          {
-            ...rest,
-            ...metadata
-          }
-        )
-      }));
+      const objects = makeObjectIds(data.objects);
 
       console.log('objects 1', objects);
       try {
@@ -159,16 +169,7 @@ const TypesForm = (
             .depth(0)
             .skip(skip)
             .limit(count)
-            const objects: { metadata: any[], [key: string]: any }[] = makeObjectIds(data.objects.map((object: { [x: string]: any; metadata: any }) => {
-              const { metadata, ...rest } = object;
-              return (
-                {
-                  ...rest,
-                  ...metadata
-                }
-              )
-            }));
-            console.log('objects 2', objects);
+            const objects = makeObjectIds(data.objects);
 
           try {
             const addObjectsRes = await algoliaIndex.saveObjects(objects)
