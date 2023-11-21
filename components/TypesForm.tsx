@@ -45,21 +45,22 @@ const makeObjectIds = (objects: []) => {
     const { metadata, ...rest } = object;
     return { objectID: object.id, ...rest, ...metadata }
   }).map((item) => {
+    // reduce objects to only include values
     const newItem: MetadataObject = { ...item };
   
     for (const [key, value] of Object.entries(newItem)) {
-      console.log(typeof value)
-      console.log(value)
+      // If the value is an object, and it has a value property, use that instead
       if (typeof value === 'object' && value?.value) {
-        console.log(value.value);
         newItem[key] = value.value;
       }
+
+      // If the value is an object, and it has an imgix_url property, use that instead
+      if (typeof value === 'object' && value?.imgix_url) {
+        newItem[key] = value.imgix_url
+      }
     }
-  
     return newItem;
   });
-  
-  
   return objectsWIds
 }
 
