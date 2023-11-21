@@ -36,33 +36,39 @@ import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/components/ui/use-toast"
 
 interface MetadataObject {
-  [key: string]: string | MetadataObject | undefined;
+  [key: string]: string | MetadataObject | undefined | (string | MetadataObject)[];
 }
 
 // Helpers
-const makeObjectIds = (objects: []) => {
-  const objectsWIds = objects.map((object: any) => {
+const makeObjectIds = (objects: any[]) => {
+  const objectsWIds = objects.map((object) => {
     const { metadata, ...rest } = object;
-    return { objectID: object.id, ...rest, ...metadata }
+    return { objectID: object.id, ...rest, ...metadata };
   }).map((item) => {
     // reduce objects to only include values
     const newItem: MetadataObject = { ...item };
   
     for (const [key, value] of Object.entries(newItem)) {
       // If the value is an object, and it has a value property, use that instead
-      if (typeof value === 'object' && value?.value) {
+      if (typeof value === 'object' && 'value' in value) {
         newItem[key] = value.value;
       }
 
       // If the value is an object, and it has an imgix_url property, use that instead
-      if (typeof value === 'object' && value?.imgix_url) {
-        newItem[key] = value.imgix_url
+      if (typeof value === 'object' && 'imgix_url' in value) {
+        newItem[key] = value.imgix_url;
+      }
+
+      // If the value is an array, and you want to map over it, you need to check if it's an array
+      if (Array.isArray(value)) {
+        newItem[key] = value.map((item: any) => item.title);
       }
     }
     return newItem;
   });
-  return objectsWIds
-}
+
+  return objectsWIds;
+};
 
 // How many Objects to get at a time
 const count = 10
