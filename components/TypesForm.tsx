@@ -48,6 +48,8 @@ const makeObjectIds = (objects: []) => {
     const newItem: MetadataObject = { ...item };
   
     for (const [key, value] of Object.entries(newItem)) {
+      console.log(typeof value)
+      console.log(value)
       if (typeof value === 'object' && value?.value) {
         console.log(value.value);
         newItem[key] = value.value;
