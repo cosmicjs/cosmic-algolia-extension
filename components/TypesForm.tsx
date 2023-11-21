@@ -143,7 +143,7 @@ const TypesForm = (
           type: type,
         })
         .props(cosmicProps)
-        .depth(0)
+        .depth(1)
         .limit(count)
       // Add ObjectIDs
       const objects = makeObjectIds(data.objects);
@@ -169,7 +169,7 @@ const TypesForm = (
               type: type,
             })
             .props(cosmicProps)
-            .depth(0)
+            .depth(1)
             .skip(skip)
             .limit(count)
             const objects = makeObjectIds(data.objects);
