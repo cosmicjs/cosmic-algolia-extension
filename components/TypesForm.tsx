@@ -58,6 +58,11 @@ const makeObjectIds = (objects: any[]) => {
         if (value.hasOwnProperty('imgix_url')) {
           newItem[key] = (value as { imgix_url: any }).imgix_url;
         }
+        
+        // If the value is an object, and it has a title property, use that instead
+        if (value.hasOwnProperty('title')) {
+          newItem[key] = (value as { title: any }).title;
+        }
 
         // If the value is an array, extract titles
         if (Array.isArray(value) && value.length > 0) {
