@@ -66,7 +66,7 @@ const makeObjectIds = (objects: any[]) => {
 
         // If the value is an array, extract titles
         if (Array.isArray(value) && value.length > 0) {
-          newItem[key] = value.map((item: any) => item.title).filter((title) => title !== undefined);
+          newItem[key] = value.map((item: any) => item?.title || item)
         }
       }
     }
