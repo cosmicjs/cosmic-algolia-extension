@@ -9,7 +9,9 @@ Add your Cosmic Objects to [Algolia](https://www.algolia.com). Connects to the C
 *This plugin addresses the issue of Cosmics Algolia plugin saving all data fields as a single metadata object within an Algolia index and not extracting values from nested objects.* 
 
 This plugin destructures the metadata and saves key / values as indexable fields in Algolia. 
+
 This plugin extracts nested data within certain object types, objects with properties such as ```title```, ```imgix_url```, and ```value```, will be saved as those values alone. 
+
 This plugin adds additional default props to each sync: ```id,slug,title,content,metadata,locale,type,created_at,modified_at,published_at```   
 
 
