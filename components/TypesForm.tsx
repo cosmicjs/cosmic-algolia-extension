@@ -79,7 +79,7 @@ const makeObjectIds = (objects: any[]) => {
 
 // How many Objects to get at a time
 const count = 10
-const defaultProps = "id,slug,title,content,metadata,locale,type"
+const defaultProps = "id,slug,title,content,metadata,locale,type,created_at,modified_at,published_at"
 
 type HitProps = {
   hit: {
