@@ -43,7 +43,11 @@ interface MetadataObject {
 const makeObjectIds = (objects: any[]) => {
   const objectsWIds = objects.map((object) => {
     const { metadata, ...rest } = object;
-    return { objectID: object.id, ...rest, ...metadata };
+
+    // make custom ID that contains slug and locale if available, defaults to just slug
+    const customId = object.locale ? `${object.slug}-${object.locale}` : object.slug;
+
+    return { objectID: customId, ...rest, ...metadata };
   }).map((item) => {
     const newItem: MetadataObject = { ...item };
 
